@@ -15,6 +15,34 @@ This platform introduces an **AI-Learned Smart Automation Platform** that autono
 
 ---
 
+## 🧱 The 4 Core Pillars of the Project
+
+The entire architecture is divided into **four modular pillars**:
+
+```
+ ┌─────────────────────────────────────────────────────────────────────────┐
+ │                       1. MOBILE APP (FRONTEND)                          │
+ │  React Native / Expo  ──>  react-native-maps  ──>  expo-location/sqlite │
+ └────────────────────────────────────┬────────────────────────────────────┘
+                                      │ REST APIs / WebSockets
+ ┌────────────────────────────────────▼────────────────────────────────────┐
+ │                       3. BACKEND SERVER & API                           │
+ │  FastAPI Server  ──>  OR-Tools Route Solver  ──>  Live Ingestion        │
+ └─────────────┬─────────────────────────────────────────────┬─────────────┘
+               │                                             │
+ ┌─────────────▼─────────────┐                 ┌─────────────▼─────────────┐
+ │    2. MACHINE LEARNING    │                 │    4. SPATIAL DATABASE    │
+ │ PyTorch Geometric GNN     │                 │ PostgreSQL + PostGIS      │
+ └───────────────────────────┘                 └───────────────────────────┘
+```
+
+1. 📱 **Mobile App (Frontend):** React Native (Expo), TypeScript, `react-native-maps`, `expo-location`, `expo-notifications`, `expo-sqlite`. Handles live map rendering of hazard polygons & route polylines, dual admin/user roles, high-priority push alerts, offline SQLite caching, and one-tap SOS.
+2. 🧠 **Machine Learning (ML Engine):** PyTorch Geometric (PyG) GNN (Graph Attention Network) trained on EM-DAT and NDMA disaster datasets. Predicts secondary compound cascades (*e.g., Flood → Landslide*) with a 6–12 hour lead time.
+3. ⚡ **Backend Server (API & Optimization):** Python FastAPI + Google OR-Tools / NetworkX. Exposes REST API endpoints (`/api/predict-cascade`, `/api/evacuation-route`), calculates hazard-avoiding evacuation routes, and ingests live IMD rainfall & CWC river gauge data.
+4. 🗄️ **Database (Spatial & GIS Data Layer):** PostgreSQL with PostGIS extension. Manages spatial geofence indexing (`ST_Contains`), OpenStreetMap road network graphs, and shelter capacity records.
+
+---
+
 ## 📊 Impact Metrics Target
 
 | Metric | Legacy Disaster Systems | Proposed AI Platform | Target Improvement |
@@ -56,30 +84,6 @@ The project integrates two core technical engines:
 
 ---
 
-## 🛠️ Tech Stack Specifications
-
-```
- ┌──────────────────────────────────────────────────────────────────┐
- │                    REACT NATIVE MOBILE APP                       │
- │  Expo / React Native  ──>  TypeScript  ──>  react-native-maps    │
- │  expo-location        ──>  expo-notifications  ──>  expo-sqlite  │
- └────────────────────────────────┬─────────────────────────────────┘
-                                  │ REST APIs / WebSockets
- ┌────────────────────────────────▼─────────────────────────────────┐
- │                      PYTHON BACKEND SERVER                       │
- │  FastAPI  ──>  PyTorch GNN (Cascade)  ──>  OR-Tools (Routing)    │
- │  PostgreSQL + PostGIS  ──>  OpenStreetMap Graph (OSM)            │
- └──────────────────────────────────────────────────────────────────┘
-```
-
-* **Mobile App (Frontend):** React Native (Expo SDK 50+), TypeScript, `react-native-maps`, `expo-location`, `expo-notifications`, `expo-sqlite`, `Zustand`.
-* **Backend API (Server):** Python 3.10+, FastAPI, Uvicorn, Pydantic.
-* **Machine Learning Engine:** PyTorch Geometric (PyG), PyTorch, Scikit-learn, Pandas.
-* **Optimization Engine:** Google OR-Tools, NetworkX, GeoPandas.
-* **Spatial Database:** PostgreSQL with PostGIS extension.
-
----
-
 ## 📁 Repository Structure
 
 ```text
@@ -87,26 +91,26 @@ disaster-management-platform/
 │
 ├── 🐍 backend-server/                           # PYTHON ML & BACKEND SERVER
 │   │
-│   ├── 🧠 ml_engine/                            # [ML ENGINE - Machine Learning & AI]
+│   ├── 🧠 ml_engine/                            # [PILLAR 2: ML ENGINE - Machine Learning]
 │   │   ├── models/                              # GNN Architecture & Weights (gnn_cascade_model.py)
 │   │   ├── training/                            # Training & Evaluation Scripts (train_cascade_gnn.py)
 │   │   └── feature_engineering/                 # Preprocessing & Graph Builders (build_hazard_graph.py)
 │   │
-│   ├── 🛣️ optimization/                         # [OPTIMIZATION ENGINE - Route Calculation]
+│   ├── 🛣️ optimization/                         # [PILLAR 3: OPTIMIZATION ENGINE]
 │   │   ├── route_optimizer.py                   # Google OR-Tools Dynamic Pathfinding Solver
 │   │   └── hazard_avoidance.py                  # Hazard Penalty Weighting Logic
 │   │
-│   ├── 📊 data_pipeline/                        # [GIS & DATA PIPELINE - Data Processing]
+│   ├── 📊 data_pipeline/                        # [PILLAR 3: DATA PIPELINE]
 │   │   ├── historical_disasters/                # EM-DAT & NDMA Historical Datasets
 │   │   ├── weather_ingestion.py                 # IMD & CWC Live Data Scrapers
 │   │   └── osm_road_networks/                   # OpenStreetMap Road Network Graphs
 │   │
-│   ├── ⚡ api/                                  # [BACKEND API SERVICES - Server Endpoints]
+│   ├── ⚡ api/                                  # [PILLAR 3: BACKEND API SERVICES]
 │   │   ├── main.py                              # FastAPI Application Entry Point
 │   │   ├── routes/                              # HTTP REST Endpoints (predict, evacuation, shelters)
 │   │   └── schemas/                             # Pydantic JSON Validation Schemas (disaster.py)
 │   │
-│   ├── 🗄️ database/                             # [DATABASE & SPATIAL GIS LAYER]
+│   ├── 🗄️ database/                             # [PILLAR 4: SPATIAL DATABASE LAYER]
 │   │   ├── db_config.py                         # PostgreSQL + PostGIS Configuration
 │   │   └── spatial_queries.py                   # Geofencing & Spatial Polygon Matching
 │   │
@@ -118,12 +122,12 @@ disaster-management-platform/
     ├── package.json                             # npm package manifest
     ├── App.tsx                                  # React Native Entry Point
     └── src/
-        ├── 🎨 components/                       # Reusable UI Widgets (HazardMap, ShelterCard, AlertBanner)
-        ├── 📱 screens/                          # Application Views (MapScreen, AlertsScreen, SOSScreen)
-        ├── 🌐 services/                         # Native Services & Hardware APIs (api.ts, location, notifications)
-        ├── 🔄 store/                            # Zustand Global State Management
-        ├── 🧭 navigation/                       # React Navigation Bottom Tabs & Stacks
-        └── 📝 types/                            # TypeScript Data Interfaces
+        ├── 🎨 components/                       # [PILLAR 1: MOBILE UI] (HazardMap, ShelterCard, AlertBanner)
+        ├── 📱 screens/                          # [PILLAR 1: MOBILE UI] (MapScreen, AlertsScreen, SOSScreen)
+        ├── 🌐 services/                         # [PILLAR 1: NATIVE SERVICES] (api.ts, location, notifications)
+        ├── 🔄 store/                            # [PILLAR 1: STATE MANAGEMENT] (useDisasterStore.ts)
+        ├── 🧭 navigation/                       # [PILLAR 1: NAVIGATION] (AppNavigator.tsx)
+        └── 📝 types/                            # [PILLAR 1: TYPESCRIPT DEFINITIONS] (index.ts)
 ```
 
 ---
