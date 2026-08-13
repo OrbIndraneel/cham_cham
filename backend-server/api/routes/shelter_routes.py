@@ -1,26 +1,17 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends, Query
+from typing import List, Optional
+from database.connection import get_db
+from database.repositories import SpatialShelterRepository
 
 router = APIRouter()
 
 @router.get("/shelters")
-def get_nearby_shelters(lat: float, lng: float):
-    return [
-        {
-            "shelter_id": "sh_01",
-            "name": "Government Senior School Relief Camp",
-            "latitude": lat + 0.010,
-            "longitude": lng + 0.012,
-            "capacity": 500,
-            "current_occupancy": 120,
-            "status": "Open"
-        },
-        {
-            "shelter_id": "sh_02",
-            "name": "Community Hall Emergency Shelter",
-            "latitude": lat - 0.008,
-            "longitude": lng - 0.005,
-            "capacity": 300,
-            "current_occupancy": 45,
-            "status": "Open"
-        }
-    ]
+def get_nearby_shelters(
+    lat: float = Query(..., description="Latitude of user location"),
+    lng: float = Query(..., description="Longitude of user location"),
+    radius_km: Optional[float] = Query(15.0, description="Search radius in kilometers"),
+    db=Depends(get_db)
+):
+    repo = SpatialShelterRepository(db_session=db)
+    shelters = repo.get_nearby_shelters(lat=lat, lng=lng, radius_km=radius_km)
+    return shelters
