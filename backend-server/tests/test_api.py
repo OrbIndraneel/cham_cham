@@ -84,3 +84,29 @@ def test_get_active_sos_alerts_endpoint(client):
     data = response.json()
     assert isinstance(data, list)
     assert len(data) > 0
+
+def test_broadcast_alert_endpoint(client):
+    payload = {
+        "title": "URGENT: Flash Flood Alert",
+        "body": "Evacuate low lying areas near river.",
+        "severity": "CRITICAL",
+        "disaster_type": "FLOOD",
+        "target_region": "Vadodara",
+        "action_required": "EVACUATE_IMMEDIATELY",
+        "send_push_notification": True,
+        "trigger_emergency_siren": True
+    }
+    response = client.post("/api/alerts/broadcast", json=payload)
+    assert response.status_code == 200
+    data = response.json()
+    assert data["title"] == "URGENT: Flash Flood Alert"
+    assert data["severity"] == "CRITICAL"
+    assert "alert_id" in data
+
+def test_get_active_alerts_endpoint(client):
+    response = client.get("/api/alerts/active")
+    assert response.status_code == 200
+    data = response.json()
+    assert isinstance(data, list)
+    assert len(data) > 0
+

@@ -1,0 +1,18 @@
+{
+  "model_name": "Optimized_GATCascadeNet_v2",
+  "in_channels": 6,
+  "optimizations": [
+    "LayerNorm",
+    "ResidualSkipConnections",
+    "ZScoreNormalization",
+    "AdamW",
+    "ReduceLROnPlateau",
+    "GradClipping"
+  ],
+  "status": "Trained & Sweet-Spot Hit",
+  "target_hazards": [
+    "Heavy Rainfall",
+    "Landslide",
+    "Flash Flood"
+  ]
+}

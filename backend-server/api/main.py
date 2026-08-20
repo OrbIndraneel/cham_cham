@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from api.routes import predict_routes, evacuation_routes, shelter_routes, sos_routes
+from api.routes import predict_routes, evacuation_routes, shelter_routes, sos_routes, alert_routes
 
 app = FastAPI(
     title="Disaster Management AI Platform API",
@@ -20,6 +20,8 @@ app.include_router(predict_routes.router, prefix="/api", tags=["Cascade Predicti
 app.include_router(evacuation_routes.router, prefix="/api", tags=["Route Optimization"])
 app.include_router(shelter_routes.router, prefix="/api", tags=["Safe Shelters"])
 app.include_router(sos_routes.router, prefix="/api", tags=["Emergency SOS Alerts"])
+app.include_router(alert_routes.router, prefix="/api", tags=["Broadcast Alerts"])
+
 
 @app.get("/")
 def root():

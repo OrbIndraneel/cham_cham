@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends
 from api.schemas.disaster import EvacuationRouteRequest, EvacuationRouteResponse
 from database.connection import get_db
 from database.repositories import SpatialShelterRepository, haversine_distance
+from optimization.route_optimizer import EvacuationRouteOptimizer
 
 router = APIRouter()
 
@@ -20,23 +21,22 @@ def calculate_evacuation_route(request: EvacuationRouteRequest, db=Depends(get_d
         target_lng = target["longitude"]
         dest_id = target["shelter_id"]
 
-    dist_km = haversine_distance(request.user_lat, request.user_lng, target_lat, target_lng)
-    est_time = max(5, int(dist_km * 4.5))
-
-    # Construct hazard-avoiding waypoint polyline
-    mid_lat = (request.user_lat + target_lat) / 2.0 + 0.003
-    mid_lng = (request.user_lng + target_lng) / 2.0 + 0.004
-
-    route_waypoints = [
-        [request.user_lat, request.user_lng],
-        [round(mid_lat, 4), round(mid_lng, 4)],
-        [round(target_lat, 4), round(target_lng, 4)]
-    ]
+    optimizer = EvacuationRouteOptimizer()
+    hazard_polygons = getattr(request, "avoid_hazard_polygons", None)
+    
+    route_result = optimizer.calculate_evacuation_route(
+        origin_lat=request.user_lat,
+        origin_lng=request.user_lng,
+        target_lat=target_lat,
+        target_lng=target_lng,
+        hazard_polygons=hazard_polygons
+    )
 
     return EvacuationRouteResponse(
         route_id=f"route_{dest_id}",
-        distance_km=dist_km,
-        estimated_time_mins=est_time,
-        hazard_avoided=True,
-        route_coordinates=route_waypoints
+        distance_km=route_result["distance_km"],
+        estimated_time_mins=route_result["estimated_time_mins"],
+        hazard_avoided=route_result["hazard_avoided"],
+        route_coordinates=route_result["route_coordinates"]
     )
+

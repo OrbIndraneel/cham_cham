@@ -74,3 +74,27 @@ class SOSAlertResponse(BaseModel):
     status: str  # 'Pending', 'Dispatched', 'Rescued', 'Resolved'
     created_at: str
     notes: Optional[str] = None
+
+class AlertBroadcastRequest(BaseModel):
+    title: str
+    body: str
+    severity: str  # 'LOW', 'MODERATE', 'HIGH', 'CRITICAL'
+    disaster_type: str  # 'FLOOD', 'LANDSLIDE', etc.
+    target_region: str
+    action_required: str
+    send_push_notification: Optional[bool] = True
+    trigger_emergency_siren: Optional[bool] = False
+
+class AlertBroadcastResponse(BaseModel):
+    alert_id: str
+    title: str
+    body: str
+    severity: str
+    disaster_type: str
+    target_region: str
+    issued_by: str
+    issued_at: str
+    action_required: str
+    affected_population_estimate: Optional[int] = 42500
+    acknowledgment_required: Optional[bool] = False
+

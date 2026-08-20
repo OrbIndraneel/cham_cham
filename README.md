@@ -117,17 +117,18 @@ disaster-management-platform/
 │   └── requirements.txt                         # Python Dependency Manifest
 │
 │
-└── 📱 mobile-app/                               # REACT NATIVE MOBILE APPLICATION
+└── 📱 Suraksha_AI_App/                          # REACT NATIVE EXPO MOBILE APPLICATION
     │
-    ├── package.json                             # npm package manifest
-    ├── App.tsx                                  # React Native Entry Point
+    ├── package.json                             # npm package manifest & Expo SDK 57 dependencies
+    ├── app.json                                 # Expo configuration manifest
+    ├── app/                                     # Expo Router file-based app routes (civilian & authority)
+    │   ├── civilian/                            # Civilian user UI (live map, bottom sheets, SOS)
+    │   └── authority/                           # Authority control room dashboard & simulator
     └── src/
-        ├── 🎨 components/                       # [PILLAR 1: MOBILE UI] (HazardMap, ShelterCard, AlertBanner)
-        ├── 📱 screens/                          # [PILLAR 1: MOBILE UI] (MapScreen, AlertsScreen, SOSScreen)
-        ├── 🌐 services/                         # [PILLAR 1: NATIVE SERVICES] (api.ts, location, notifications)
-        ├── 🔄 store/                            # [PILLAR 1: STATE MANAGEMENT] (useDisasterStore.ts)
-        ├── 🧭 navigation/                       # [PILLAR 1: NAVIGATION] (AppNavigator.tsx)
-        └── 📝 types/                            # [PILLAR 1: TYPESCRIPT DEFINITIONS] (index.ts)
+        ├── 🎨 components/                       # UI components (HazardMap, ShelterBottomSheet, AlertBanner)
+        ├── 🌐 services/                         # Dual-mode API Client, Location, Notification & Storage
+        ├── 🔄 store/                            # Zustand stores (useDisasterStore, useAuthorityStore, etc.)
+        └── 📝 types/                            # TypeScript interfaces (Disaster, Alert, User profiles)
 ```
 
 ---
@@ -137,7 +138,7 @@ disaster-management-platform/
 ### 1. Prerequisites
 * Python 3.10+
 * Node.js 18+ & npm
-* Expo Go app on mobile device (or Android Emulator)
+* Expo Go app on mobile device (or Android / iOS Emulator)
 
 ---
 
@@ -167,11 +168,11 @@ The backend server will be live at `http://localhost:8000`. You can inspect inte
 
 ---
 
-### 3. Mobile App Setup (React Native)
+### 3. Mobile App Setup (Suraksha AI App)
 
 ```bash
-# Navigate to mobile app directory
-cd mobile-app
+# Navigate to Suraksha AI App directory
+cd Suraksha_AI_App
 
 # Install npm dependencies
 npm install
