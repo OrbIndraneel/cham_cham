@@ -26,6 +26,16 @@ class HazardPredictionRequest(BaseModel):
     rainfall_mm: float
     river_level_m: Optional[float] = None
     district_id: str
+    elevation_m: Optional[float] = 100.0
+    slope_angle_deg: Optional[float] = 25.0
+    temperature_c: Optional[float] = 28.0
+    humidity_pct: Optional[float] = 75.0
+    river_discharge_m3s: Optional[float] = 300.0
+    land_cover: Optional[str] = "Urban"
+    soil_type: Optional[str] = "Clay"
+    population_density: Optional[int] = 1000
+    infrastructure: Optional[int] = 1
+    historical_floods: Optional[int] = 1
 
 class HazardPredictionResponse(BaseModel):
     district_id: str
@@ -38,6 +48,8 @@ class HazardPredictionResponse(BaseModel):
     severity_score: Optional[float] = 5.0
     soil_saturation_index: Optional[float] = 0.0
     polygon_coordinates: List[List[float]]
+    stage_1_local_flood_risk: Optional[Dict[str, Any]] = None
+    unified_disaster_assessment: Optional[Dict[str, Any]] = None
 
 class EvacuationRouteRequest(BaseModel):
     user_lat: float

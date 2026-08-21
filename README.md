@@ -90,46 +90,30 @@ The project integrates two core technical engines:
 disaster-management-platform/
 │
 ├── 🐍 backend-server/                           # PYTHON ML & BACKEND SERVER
-│   │
-│   ├── 🧠 ml_engine/                            # [PILLAR 2: ML ENGINE - Machine Learning]
-│   │   ├── models/                              # GNN Architecture & Weights (gnn_cascade_model.py)
-│   │   ├── training/                            # Training & Evaluation Scripts (train_cascade_gnn.py)
-│   │   └── feature_engineering/                 # Preprocessing & Graph Builders (build_hazard_graph.py)
-│   │
-│   ├── 🛣️ optimization/                         # [PILLAR 3: OPTIMIZATION ENGINE]
-│   │   ├── route_optimizer.py                   # Google OR-Tools Dynamic Pathfinding Solver
-│   │   └── hazard_avoidance.py                  # Hazard Penalty Weighting Logic
-│   │
-│   ├── 📊 data_pipeline/                        # [PILLAR 3: DATA PIPELINE]
-│   │   ├── historical_disasters/                # EM-DAT & NDMA Historical Datasets
-│   │   ├── weather_ingestion.py                 # IMD & CWC Live Data Scrapers
-│   │   └── osm_road_networks/                   # OpenStreetMap Road Network Graphs
-│   │
-│   ├── ⚡ api/                                  # [PILLAR 3: BACKEND API SERVICES]
-│   │   ├── main.py                              # FastAPI Application Entry Point
-│   │   ├── routes/                              # HTTP REST Endpoints (predict, evacuation, shelters)
-│   │   └── schemas/                             # Pydantic JSON Validation Schemas (disaster.py)
-│   │
-│   ├── 🗄️ database/                             # [PILLAR 4: SPATIAL DATABASE LAYER]
-│   │   ├── db_config.py                         # PostgreSQL + PostGIS Configuration
-│   │   └── spatial_queries.py                   # Geofencing & Spatial Polygon Matching
-│   │
-│   └── requirements.txt                         # Python Dependency Manifest
+│   ├── 🧠 ml_engine/                            # [PILLAR 2: ML ENGINE] XGBoost & PyTorch GAT Models
+│   │   ├── combined_disaster_engine.py          # Unified Multi-Stage Disaster Pipeline Wrapper
+│   │   ├── models/                              # GAT Cascade Network & Weights (gat_cascade_v1.pt)
+│   │   ├── training/                            # Training, Evaluation & Integrity Audit Suites
+│   │   └── feature_engineering/                 # Spatial Grid Graph Builders & Preprocessing
+│   ├── 🛣️ optimization/                         # [PILLAR 3: OPTIMIZATION ENGINE] OR-Tools Pathfinding
+│   ├── 📊 data_pipeline/                        # Live Ingestion & Historical Dataset Processors
+│   ├── ⚡ api/                                  # FastAPI App, REST Routes & Pydantic Schemas
+│   ├── 🗄️ database/                             # PostGIS Spatial Schema & Query Repositories
+│   └── 🧪 tests/                                # Automated Unit & Integration Test Suites
 │
+├── 📱 Suraksha_AI_App/                          # REACT NATIVE EXPO MOBILE APPLICATION
+│   ├── app/                                     # Expo Router File-Based Navigation (Civilian & Authority)
+│   └── src/                                     # UI Components, Services, Stores & Types
 │
-└── 📱 Suraksha_AI_App/                          # REACT NATIVE EXPO MOBILE APPLICATION
-    │
-    ├── package.json                             # npm package manifest & Expo SDK 57 dependencies
-    ├── app.json                                 # Expo configuration manifest
-    ├── app/                                     # Expo Router file-based app routes (civilian & authority)
-    │   ├── civilian/                            # Civilian user UI (live map, bottom sheets, SOS)
-    │   └── authority/                           # Authority control room dashboard & simulator
-    └── src/
-        ├── 🎨 components/                       # UI components (HazardMap, ShelterBottomSheet, AlertBanner)
-        ├── 🌐 services/                         # Dual-mode API Client, Location, Notification & Storage
-        ├── 🔄 store/                            # Zustand stores (useDisasterStore, useAuthorityStore, etc.)
-        └── 📝 types/                            # TypeScript interfaces (Disaster, Alert, User profiles)
+├── 📦 Combined_Disaster_Model_Package/          # STANDALONE DISASTER ML ENGINE PACKAGE & DOCS
+│
+├── 📄 docs/                                     # PROJECT DOCUMENTATION & REPORTS
+│   ├── reports/                                 # Technical Summaries, Research & SRS Reports (.docx)
+│   └── specifications/                          # SRS & Design Specification Documents (.md)
+│
+└── 🛠️ scripts/                                  # UTILITY & DATA GENERATION SCRIPTS
 ```
+
 
 ---
 

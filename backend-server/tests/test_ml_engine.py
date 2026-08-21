@@ -25,3 +25,20 @@ def test_cascade_predictor_inference():
     assert 0.0 <= result["cascade_probability"] <= 1.0
     assert 15 <= result["estimated_lead_time_mins"] <= 180
     assert len(result["polygon_coordinates"]) == 4
+
+def test_combined_disaster_engine():
+    from ml_engine.combined_disaster_engine import CombinedDisasterEngine
+    engine = CombinedDisasterEngine()
+    result = engine.predict({
+        "latitude": 30.73,
+        "longitude": 79.06,
+        "district_id": "CHAMOLI_01",
+        "Rainfall_mm": 380.0,
+        "Water_Level_m": 8.5,
+        "Elevation_m": 2200,
+        "slope_angle_deg": 44.0
+    })
+    assert "stage_1_local_flood_risk" in result
+    assert "stage_2_spatial_cascade_hazard" in result
+    assert "unified_disaster_assessment" in result
+    assert 0.0 <= result["unified_disaster_assessment"]["unified_risk_score"] <= 1.0

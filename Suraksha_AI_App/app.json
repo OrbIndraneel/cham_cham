@@ -17,6 +17,11 @@
     },
     "android": {
       "package": "com.suraksha.ai",
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyCyKahAehSShdxhN1LOfObLMroOD2SVbYs"
+        }
+      },
       "adaptiveIcon": {
         "backgroundColor": "#18181B",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -30,7 +35,9 @@
         "POST_NOTIFICATIONS",
         "VIBRATE",
         "RECEIVE_BOOT_COMPLETED",
-        "INTERNET"
+        "INTERNET",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
       ],
       "predictiveBackGestureEnabled": false
     },
@@ -66,6 +73,12 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "b6119536-5516-495c-adfe-e212a15c0a02"
+      }
     }
   }
 }

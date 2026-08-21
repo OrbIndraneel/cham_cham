@@ -1,9 +1,10 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, Component, ReactNode } from 'react';
 import { View, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import MapView, { Polygon, Marker, Polyline, PROVIDER_DEFAULT } from 'react-native-maps';
 import { Hazard, Shelter, EvacuationRoute, RoadClosureMarker, Coordinate } from '../../types';
 import { colors, radius, spacing, typography, shadows } from '../../theme';
 import { AlertTriangle, Home, MapPin, Navigation, ShieldAlert, Crosshair } from 'lucide-react-native';
+import { HazardMap as WebFallbackMap } from './HazardMap.web';
 
 interface Props {
   hazards: Hazard[];
@@ -21,9 +22,38 @@ interface Props {
   };
 }
 
+class MapErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
+  state = { hasError: false };
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: any) {
+    console.warn('[HazardMap Native ErrorBoundary] Caught map crash:', error);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return <WebFallbackMap />;
+    }
+    return this.props.children;
+  }
+}
+
+const isValidCoordinate = (coord?: Coordinate | null): coord is Coordinate => {
+  return (
+    coord != null &&
+    typeof coord.latitude === 'number' &&
+    !isNaN(coord.latitude) &&
+    typeof coord.longitude === 'number' &&
+    !isNaN(coord.longitude)
+  );
+};
+
 export const HazardMap: React.FC<Props> = ({
-  hazards,
-  shelters,
+  hazards = [],
+  shelters = [],
   evacuationRoute,
   roadClosures = [],
   userLocation,
@@ -34,20 +64,27 @@ export const HazardMap: React.FC<Props> = ({
   const mapRef = useRef<MapView | null>(null);
 
   const initialRegion = {
-    latitude: userLocation?.latitude || 22.3072,
-    longitude: userLocation?.longitude || 73.1812,
+    latitude: isValidCoordinate(userLocation) ? userLocation.latitude : 22.3072,
+    longitude: isValidCoordinate(userLocation) ? userLocation.longitude : 73.1812,
     latitudeDelta: 0.08,
     longitudeDelta: 0.08,
   };
 
   useEffect(() => {
-    if (userLocation && mapRef.current) {
-      mapRef.current.animateToRegion({
-        latitude: userLocation.latitude,
-        longitude: userLocation.longitude,
-        latitudeDelta: 0.06,
-        longitudeDelta: 0.06,
-      }, 1000);
+    if (isValidCoordinate(userLocation) && mapRef.current) {
+      try {
+        mapRef.current.animateToRegion(
+          {
+            latitude: userLocation.latitude,
+            longitude: userLocation.longitude,
+            latitudeDelta: 0.06,
+            longitudeDelta: 0.06,
+          },
+          1000
+        );
+      } catch (e) {
+        console.warn('Map animation failed:', e);
+      }
     }
   }, [userLocation]);
 
@@ -70,96 +107,106 @@ export const HazardMap: React.FC<Props> = ({
   };
 
   return (
-    <View style={styles.container}>
-      <MapView
-        ref={mapRef}
-        style={styles.map}
-        provider={PROVIDER_DEFAULT}
-        initialRegion={initialRegion}
-        showsUserLocation={true}
-        showsMyLocationButton={false}
-        showsCompass={false}
-      >
-        {/* 1. HAZARD POLYGONS */}
-        {layers.hazards &&
-          hazards.map((hazard) => {
-            if (!hazard.coordinates || hazard.coordinates.length < 3) return null;
-            return (
-              <Polygon
-                key={hazard.id}
-                coordinates={hazard.coordinates}
-                fillColor={getHazardFillColor(hazard.severity)}
-                strokeColor={getHazardStrokeColor(hazard.severity)}
-                strokeWidth={2.5}
-                tappable={true}
-                onPress={() => onSelectHazard?.(hazard)}
-              />
-            );
-          })}
+    <MapErrorBoundary>
+      <View style={styles.container}>
+        <MapView
+          ref={mapRef}
+          style={styles.map}
+          provider={PROVIDER_DEFAULT}
+          initialRegion={initialRegion}
+          showsUserLocation={isValidCoordinate(userLocation)}
+          showsMyLocationButton={false}
+          showsCompass={false}
+        >
+          {/* 1. HAZARD POLYGONS */}
+          {layers.hazards &&
+            hazards.map((hazard) => {
+              if (!hazard.coordinates || !Array.isArray(hazard.coordinates)) return null;
+              const validCoords = hazard.coordinates.filter(isValidCoordinate);
+              if (validCoords.length < 3) return null;
+              return (
+                <Polygon
+                  key={hazard.id}
+                  coordinates={validCoords}
+                  fillColor={getHazardFillColor(hazard.severity)}
+                  strokeColor={getHazardStrokeColor(hazard.severity)}
+                  strokeWidth={2.5}
+                  tappable={true}
+                  onPress={() => onSelectHazard?.(hazard)}
+                />
+              );
+            })}
 
-        {/* 2. EVACUATION ROUTE POLYLINES */}
-        {layers.routes && evacuationRoute?.polyline && (
-          <>
-            <Polyline
-              coordinates={evacuationRoute.polyline}
-              strokeColor={colors.status.success}
-              strokeWidth={5}
-            />
-            {evacuationRoute.alternativePolyline && (
-              <Polyline
-                coordinates={evacuationRoute.alternativePolyline}
-                strokeColor={colors.primary.main}
-                strokeWidth={4}
-                lineDashPattern={[6, 4]}
-              />
-            )}
-            {evacuationRoute.dangerousSegmentsPolyline && (
-              <Polyline
-                coordinates={evacuationRoute.dangerousSegmentsPolyline}
-                strokeColor={colors.severity.CRITICAL.main}
-                strokeWidth={4}
-                lineDashPattern={[4, 4]}
-              />
-            )}
-          </>
-        )}
+          {/* 2. EVACUATION ROUTE POLYLINES */}
+          {layers.routes && evacuationRoute?.polyline && (
+            <>
+              {Array.isArray(evacuationRoute.polyline) && (
+                <Polyline
+                  coordinates={evacuationRoute.polyline.filter(isValidCoordinate)}
+                  strokeColor={colors.status.success}
+                  strokeWidth={5}
+                />
+              )}
+              {Array.isArray(evacuationRoute.alternativePolyline) && (
+                <Polyline
+                  coordinates={evacuationRoute.alternativePolyline.filter(isValidCoordinate)}
+                  strokeColor={colors.primary.main}
+                  strokeWidth={4}
+                  lineDashPattern={[6, 4]}
+                />
+              )}
+              {Array.isArray(evacuationRoute.dangerousSegmentsPolyline) && (
+                <Polyline
+                  coordinates={evacuationRoute.dangerousSegmentsPolyline.filter(isValidCoordinate)}
+                  strokeColor={colors.severity.CRITICAL.main}
+                  strokeWidth={4}
+                  lineDashPattern={[4, 4]}
+                />
+              )}
+            </>
+          )}
 
-        {/* 3. SHELTER MARKERS */}
-        {layers.shelters &&
-          shelters.map((shelter) => {
-            const occupancy = shelter.currentOccupancy / shelter.totalCapacity;
-            const badgeColor =
-              occupancy >= 0.9
-                ? colors.severity.CRITICAL.main
-                : occupancy >= 0.7
-                ? colors.severity.MODERATE.main
-                : colors.status.success;
+          {/* 3. SHELTER MARKERS */}
+          {layers.shelters &&
+            shelters.map((shelter) => {
+              if (!isValidCoordinate(shelter.coordinate)) return null;
+              const occupancy = shelter.totalCapacity ? shelter.currentOccupancy / shelter.totalCapacity : 0;
+              const badgeColor =
+                occupancy >= 0.9
+                  ? colors.severity.CRITICAL.main
+                  : occupancy >= 0.7
+                  ? colors.severity.MODERATE.main
+                  : colors.status.success;
 
-            return (
-              <Marker
-                key={shelter.id}
-                coordinate={shelter.coordinate}
-                onPress={() => onSelectShelter?.(shelter)}
-                title={shelter.name}
-              >
-                <View style={[styles.shelterPin, { borderColor: badgeColor }]}>
-                  <Home size={14} color="#FFF" />
-                </View>
-              </Marker>
-            );
-          })}
+              return (
+                <Marker
+                  key={shelter.id}
+                  coordinate={shelter.coordinate}
+                  onPress={() => onSelectShelter?.(shelter)}
+                  title={shelter.name}
+                >
+                  <View style={[styles.shelterPin, { borderColor: badgeColor }]}>
+                    <Home size={14} color="#FFF" />
+                  </View>
+                </Marker>
+              );
+            })}
 
-        {/* 4. ROAD CLOSURES */}
-        {layers.roadClosures &&
-          roadClosures.map((closure) => (
-            <Marker key={closure.id} coordinate={closure.coordinate} title={closure.name}>
-              <View style={styles.roadClosurePin}>
-                <Text style={styles.closureText}>✕</Text>
-              </View>
-            </Marker>
-          ))}
-      </MapView>
-    </View>
+          {/* 4. ROAD CLOSURES */}
+          {layers.roadClosures &&
+            roadClosures.map((closure) => {
+              if (!isValidCoordinate(closure.coordinate)) return null;
+              return (
+                <Marker key={closure.id} coordinate={closure.coordinate} title={closure.name}>
+                  <View style={styles.roadClosurePin}>
+                    <Text style={styles.closureText}>✕</Text>
+                  </View>
+                </Marker>
+              );
+            })}
+        </MapView>
+      </View>
+    </MapErrorBoundary>
   );
 };
 
