@@ -9,7 +9,11 @@ import { colors, typography, spacing, radius, shadows } from '../../src/theme';
 import { Home, Radio, AlertTriangle, ShieldCheck, Truck } from 'lucide-react-native';
 
 export default function AuthoritySheltersMgmtScreen() {
-  const { shelters } = useDisasterStore();
+  const { shelters, loadDisasterData } = useDisasterStore();
+
+  React.useEffect(() => {
+    loadDisasterData();
+  }, []);
 
   const totalShelters = shelters.length;
   const openShelters = shelters.filter((s) => s.status === 'OPEN').length;

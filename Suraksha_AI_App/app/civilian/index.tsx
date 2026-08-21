@@ -1,18 +1,26 @@
-import React from 'react';
-import { View, StyleSheet, StatusBar, Platform } from 'react-native';
+import React, { useEffect } from 'react';
+import { View, StyleSheet, StatusBar } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HazardMap } from '../../src/components/map/HazardMap';
 import { MapFloatingControls } from '../../src/components/map/MapFloatingControls';
 import { FloatingAlertCard } from '../../src/components/civilian/FloatingAlertCard';
 import { SafeguardBottomSheet } from '../../src/components/civilian/SafeguardBottomSheet';
+import { useDisasterStore } from '../../src/store/useDisasterStore';
 
 export default function CivilianHomeScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { alerts, loadDisasterData } = useDisasterStore();
+
+  useEffect(() => {
+    loadDisasterData();
+  }, []);
+
+  const activeAlert = alerts[0];
 
   const handleSosPress = () => {
-    router.push('/modal/sos' as any);
+    router.push('/civilian/sos' as any);
   };
 
   const handleNavigationPress = () => {
@@ -32,7 +40,7 @@ export default function CivilianHomeScreen() {
           <MapFloatingControls />
         </View>
 
-        {/* Floating Critical Alert Banner near Top Center */}
+        {/* Floating Dynamic Critical Alert Banner near Top Center */}
         <View
           style={[
             styles.alertBannerOverlay,
@@ -41,9 +49,9 @@ export default function CivilianHomeScreen() {
           pointerEvents="box-none"
         >
           <FloatingAlertCard
-            title="CRITICAL ALERT: Secondary Landslide Risk"
-            subtitle="Detected in Zone B."
-            actionText="Rerouting active evacuation path..."
+            title={activeAlert ? activeAlert.title : 'MONITORING DISASTER REGION'}
+            subtitle={activeAlert ? `${activeAlert.targetRegion} • Issued ${activeAlert.issuedAt}` : 'All hazard sensors reporting live telemetry'}
+            actionText={activeAlert ? (activeAlert.actionRequired || 'Evacuate using AI dynamic corridor') : 'Tap to view safe evacuation corridors'}
           />
         </View>
 
@@ -87,4 +95,3 @@ const styles = StyleSheet.create({
     zIndex: 30,
   },
 });
-

@@ -51,8 +51,14 @@ export const StatCard: React.FC<Props> = ({
         </Text>
         {icon && <View style={styles.iconWrapper}>{icon}</View>}
       </View>
-      <Text style={[styles.value, { color: getValueColor() }]}>{value}</Text>
-      {subtitle && <Text style={styles.subtitle}>{subtitle}</Text>}
+      <Text style={[styles.value, { color: getValueColor() }]} numberOfLines={1}>
+        {value}
+      </Text>
+      {subtitle && (
+        <Text style={styles.subtitle} numberOfLines={1}>
+          {subtitle}
+        </Text>
+      )}
     </View>
   );
 };

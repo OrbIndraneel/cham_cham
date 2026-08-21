@@ -1,32 +1,38 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Switch, TouchableOpacity, TextInput } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Switch, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
 import { Header } from '../../src/components/common/Header';
-import { ConnectionStatus } from '../../src/components/common/ConnectionStatus';
-import { Shield, PhoneCall, HeartPulse, WifiOff, Globe, Plus, AlertCircle } from 'lucide-react-native';
+import { PhoneCall, HeartPulse, WifiOff, Globe, LogOut } from 'lucide-react-native';
 import { useUserStore } from '../../src/store/useUserStore';
-import { colors, typography, spacing, radius, shadows } from '../../src/theme';
-
 import { useTranslation, LanguageCode } from '../../src/i18n';
 
 export default function ProfileScreen() {
+  const router = useRouter();
   const { profile, toggleOfflineMode } = useUserStore();
   const { t, language, changeLanguage } = useTranslation();
+
+  const handleLogout = () => {
+    router.replace('/');
+  };
 
   return (
     <SafeAreaView style={styles.container}>
       <Header title={t('emergencyProfile')} />
-      <ConnectionStatus />
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        {/* Offline Emergency Mode Switcher */}
+      <ScrollView
+        style={styles.content}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Offline Emergency Mode Switcher Card */}
         <View style={styles.card}>
           <View style={styles.rowBetween}>
             <View style={styles.rowLeft}>
-              <View style={[styles.iconBox, { backgroundColor: 'rgba(239, 68, 68, 0.15)' }]}>
-                <WifiOff size={18} color={colors.status.error} />
+              <View style={[styles.headerIconBox, { backgroundColor: 'rgba(239, 68, 68, 0.1)' }]}>
+                <WifiOff size={16} color="#DC2626" />
               </View>
-              <View>
+              <View style={styles.flex1}>
                 <Text style={styles.cardTitle}>{t('offlineEmergencyMode')}</Text>
                 <Text style={styles.cardSubtitle}>{t('offlineModeDesc')}</Text>
               </View>
@@ -34,18 +40,21 @@ export default function ProfileScreen() {
             <Switch
               value={profile.offlineModeEnabled}
               onValueChange={toggleOfflineMode}
-              trackColor={{ false: colors.border.default, true: colors.severity.CRITICAL.main }}
-              thumbColor="#FFF"
+              trackColor={{ false: '#E4E4E7', true: '#DC2626' }}
+              thumbColor="#FFFFFF"
             />
           </View>
         </View>
 
-        {/* Medical Information */}
+        {/* Medical Information Card */}
         <View style={styles.card}>
           <View style={styles.cardHeader}>
-            <HeartPulse size={18} color={colors.severity.CRITICAL.text} />
+            <View style={[styles.headerIconBox, { backgroundColor: 'rgba(220, 38, 38, 0.1)' }]}>
+              <HeartPulse size={16} color="#DC2626" />
+            </View>
             <Text style={styles.cardTitle}>{t('civilianMedicalInfo')}</Text>
           </View>
+
           <View style={styles.infoGrid}>
             <View style={styles.infoBox}>
               <Text style={styles.infoLabel}>{t('bloodGroup')}</Text>
@@ -58,64 +67,86 @@ export default function ProfileScreen() {
           </View>
         </View>
 
-        {/* Emergency Contacts List */}
-        <View style={styles.card}>
-          <View style={styles.rowBetween}>
-            <View style={styles.cardHeader}>
-              <PhoneCall size={18} color={colors.primary.main} />
-              <Text style={styles.cardTitle}>{t('emergencyHotlinesContacts')}</Text>
-            </View>
-          </View>
-
-          {profile.emergencyContacts.map((contact) => (
-            <View key={contact.id} style={styles.contactRow}>
-              <View>
-                <Text style={styles.contactName}>
-                  {contact.name} {contact.isPrimary && `(${t('primarySos')})`}
-                </Text>
-                <Text style={styles.contactRel}>{contact.relation}</Text>
-              </View>
-              <TouchableOpacity style={styles.callChip} activeOpacity={0.7}>
-                <PhoneCall size={12} color="#FFF" />
-                <Text style={styles.callNumber}>{contact.phoneNumber}</Text>
-              </TouchableOpacity>
-            </View>
-          ))}
-        </View>
-
-        {/* Language Selection */}
+        {/* Emergency Contacts List Card */}
         <View style={styles.card}>
           <View style={styles.cardHeader}>
-            <Globe size={18} color={colors.safety.main} />
+            <View style={[styles.headerIconBox, { backgroundColor: 'rgba(234, 88, 12, 0.1)' }]}>
+              <PhoneCall size={16} color="#EA580C" />
+            </View>
+            <Text style={styles.cardTitle}>{t('emergencyHotlinesContacts')}</Text>
+          </View>
+
+          <View style={styles.contactsContainer}>
+            {profile.emergencyContacts.map((contact, index) => (
+              <View
+                key={contact.id}
+                style={[
+                  styles.contactRow,
+                  index === profile.emergencyContacts.length - 1 && styles.noBorder,
+                ]}
+              >
+                <View style={styles.contactInfo}>
+                  <Text style={styles.contactName} numberOfLines={1}>
+                    {contact.name} {contact.isPrimary ? `(${t('primarySos')})` : ''}
+                  </Text>
+                  <Text style={styles.contactRel}>{contact.relation}</Text>
+                </View>
+                <TouchableOpacity style={styles.callChip} activeOpacity={0.8}>
+                  <PhoneCall size={12} color="#FFFFFF" />
+                  <Text style={styles.callNumber}>{contact.phoneNumber}</Text>
+                </TouchableOpacity>
+              </View>
+            ))}
+          </View>
+        </View>
+
+        {/* Language Selection Card */}
+        <View style={styles.card}>
+          <View style={styles.cardHeader}>
+            <View style={[styles.headerIconBox, { backgroundColor: 'rgba(37, 99, 235, 0.1)' }]}>
+              <Globe size={16} color="#2563EB" />
+            </View>
             <Text style={styles.cardTitle}>{t('preferredLanguage')}</Text>
           </View>
+
           <View style={styles.langRow}>
             {[
               { code: 'EN', label: 'English' },
               { code: 'HI', label: 'हिंदी (Hindi)' },
               { code: 'GU', label: 'ગુજરાતી (Gujarati)' },
-            ].map((lang) => (
-              <TouchableOpacity
-                key={lang.code}
-                style={[
-                  styles.langChip,
-                  language === lang.code && styles.langChipActive,
-                ]}
-                onPress={() => changeLanguage(lang.code as LanguageCode)}
-                accessibilityRole="button"
-                accessibilityLabel={`${lang.label}${language === lang.code ? ', selected' : ''}`}
-              >
-                <Text
+            ].map((lang) => {
+              const isActive = language === lang.code;
+              return (
+                <TouchableOpacity
+                  key={lang.code}
                   style={[
-                    styles.langText,
-                    language === lang.code && styles.langTextActive,
+                    styles.langChip,
+                    isActive ? styles.langChipActive : styles.langChipInactive,
                   ]}
+                  onPress={() => changeLanguage(lang.code as LanguageCode)}
+                  activeOpacity={0.8}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${lang.label}${isActive ? ', selected' : ''}`}
                 >
-                  {lang.label}
-                </Text>
-              </TouchableOpacity>
-            ))}
+                  <Text style={[styles.langText, isActive ? styles.langTextActive : styles.langTextInactive]} numberOfLines={1}>
+                    {lang.label}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
           </View>
+        </View>
+
+        {/* Log Out / Switch Portal Card */}
+        <View style={[styles.card, styles.logoutCard]}>
+          <TouchableOpacity
+            style={styles.logoutButton}
+            onPress={handleLogout}
+            activeOpacity={0.8}
+          >
+            <LogOut size={16} color="#DC2626" />
+            <Text style={styles.logoutText}>Log Out / Switch Access Portal</Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -125,36 +156,53 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background.primary,
+    backgroundColor: '#FAFAFA',
   },
   content: {
     flex: 1,
-    padding: spacing.md,
+  },
+  scrollContent: {
+    paddingHorizontal: 16,
+    paddingTop: 14,
+    paddingBottom: 110,
   },
   card: {
-    backgroundColor: colors.background.secondary,
-    borderRadius: radius.lg,
-    padding: spacing.md,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 16,
     borderWidth: 1,
-    borderColor: colors.border.subtle,
-    marginBottom: spacing.md,
-    ...shadows.sm,
+    borderColor: '#E4E4E7',
+    marginBottom: 14,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 4,
+    elevation: 1,
   },
   cardHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.xs,
-    marginBottom: spacing.sm,
+    gap: 10,
+    marginBottom: 14,
+  },
+  headerIconBox: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   cardTitle: {
-    color: colors.text.primary,
-    fontSize: typography.fontSize.xs,
-    fontWeight: typography.fontWeight.heavy,
-    letterSpacing: 0.5,
+    color: '#18181B',
+    fontSize: 13.5,
+    fontWeight: '800',
+    letterSpacing: 0.3,
   },
   cardSubtitle: {
-    color: colors.text.secondary,
-    fontSize: 11,
+    color: '#71717A',
+    fontSize: 11.5,
+    marginTop: 2,
+    lineHeight: 16,
   },
   rowBetween: {
     flexDirection: 'row',
@@ -164,90 +212,125 @@ const styles = StyleSheet.create({
   rowLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.sm,
+    gap: 10,
+    flex: 1,
+    paddingRight: 8,
+  },
+  flex1: {
     flex: 1,
   },
-  iconBox: {
-    width: 34,
-    height: 34,
-    borderRadius: radius.md,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   infoGrid: {
-    gap: spacing.sm,
+    gap: 10,
   },
   infoBox: {
-    backgroundColor: colors.background.tertiary,
-    padding: spacing.sm,
-    borderRadius: radius.md,
+    backgroundColor: '#F4F4F5',
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 10,
   },
   infoLabel: {
-    color: colors.text.secondary,
-    fontSize: 10,
-    fontWeight: typography.fontWeight.semibold,
+    color: '#71717A',
+    fontSize: 11,
+    fontWeight: '600',
+    letterSpacing: 0.2,
   },
   infoValue: {
-    color: colors.text.primary,
-    fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.bold,
-    marginTop: 2,
+    color: '#18181B',
+    fontSize: 13.5,
+    fontWeight: '700',
+    marginTop: 3,
+  },
+  contactsContainer: {
+    gap: 2,
   },
   contactRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: spacing.xs,
+    paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: colors.border.subtle,
+    borderBottomColor: '#F4F4F5',
+  },
+  noBorder: {
+    borderBottomWidth: 0,
+  },
+  contactInfo: {
+    flex: 1,
+    paddingRight: 10,
   },
   contactName: {
-    color: colors.text.primary,
-    fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.bold,
+    color: '#18181B',
+    fontSize: 13.5,
+    fontWeight: '700',
   },
   contactRel: {
-    color: colors.text.secondary,
-    fontSize: 11,
+    color: '#71717A',
+    fontSize: 11.5,
+    marginTop: 2,
   },
   callChip: {
-    backgroundColor: colors.primary.main,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs,
-    borderRadius: radius.full,
+    backgroundColor: '#EA580C',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: 5,
   },
   callNumber: {
-    color: '#FFF',
-    fontSize: typography.fontSize.xs,
-    fontWeight: typography.fontWeight.bold,
+    color: '#FFFFFF',
+    fontSize: 11.5,
+    fontWeight: '700',
   },
   langRow: {
     flexDirection: 'row',
-    gap: spacing.xs,
+    gap: 8,
   },
   langChip: {
     flex: 1,
-    backgroundColor: colors.background.tertiary,
-    paddingVertical: spacing.xs,
-    borderRadius: radius.md,
+    paddingVertical: 10,
+    paddingHorizontal: 4,
+    borderRadius: 10,
     alignItems: 'center',
+    justifyContent: 'center',
     borderWidth: 1,
-    borderColor: colors.border.subtle,
   },
   langChipActive: {
-    backgroundColor: colors.safety.main,
-    borderColor: colors.safety.light,
+    backgroundColor: '#18181B',
+    borderColor: '#18181B',
+  },
+  langChipInactive: {
+    backgroundColor: '#F4F4F5',
+    borderColor: '#E4E4E7',
   },
   langText: {
-    color: colors.text.secondary,
-    fontSize: typography.fontSize.xs,
-    fontWeight: typography.fontWeight.semibold,
+    fontSize: 11.5,
+    fontWeight: '600',
   },
   langTextActive: {
-    color: '#FFF',
-    fontWeight: typography.fontWeight.bold,
+    color: '#FFFFFF',
+    fontWeight: '700',
+  },
+  langTextInactive: {
+    color: '#52525B',
+  },
+  logoutCard: {
+    borderColor: 'rgba(220, 38, 38, 0.2)',
+    backgroundColor: 'rgba(220, 38, 38, 0.04)',
+    padding: 0,
+    overflow: 'hidden',
+  },
+  logoutButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+  },
+  logoutText: {
+    color: '#DC2626',
+    fontSize: 13.5,
+    fontWeight: '700',
   },
 });

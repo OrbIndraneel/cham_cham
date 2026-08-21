@@ -11,8 +11,7 @@ interface OfflineState {
   cachedShelters: Shelter[];
   cachedAlerts: EmergencyAlert[];
 
-  setOnlineState: (online: boolean) => void;
-  triggerSync: () => Promise<void>;
+  silentBackgroundSync: () => Promise<void>;
   checkSyncStatus: () => Promise<void>;
   loadCachedData: () => Promise<void>;
 }
@@ -25,33 +24,34 @@ export const useOfflineStore = create<OfflineState>((set, get) => ({
   cachedShelters: VADODARA_SHELTERS,
   cachedAlerts: MOCK_ALERTS,
 
-  setOnlineState: (online: boolean) => {
-    set({ isOnline: online });
-    OfflineStorage.saveNetworkStatus(online);
-  },
+  silentBackgroundSync: async () => {
+    try {
+      set({ isSyncing: true });
+      const updatedTime = Date.now();
 
-  triggerSync: async () => {
-    set({ isSyncing: true });
-    await new Promise((resolve) => setTimeout(resolve, 1200));
+      await OfflineStorage.saveHazards(VADODARA_HAZARDS);
+      await OfflineStorage.saveShelters(VADODARA_SHELTERS);
+      await OfflineStorage.saveAlerts(MOCK_ALERTS);
+      await OfflineStorage.saveLastSyncTime(updatedTime);
 
-    const updatedTime = Date.now();
-    await OfflineStorage.saveHazards(VADODARA_HAZARDS);
-    await OfflineStorage.saveShelters(VADODARA_SHELTERS);
-    await OfflineStorage.saveAlerts(MOCK_ALERTS);
-    await OfflineStorage.saveLastSyncTime(updatedTime);
-
-    set({
-      isOnline: true,
-      isSyncing: false,
-      lastSyncTimestamp: updatedTime,
-      cachedHazards: VADODARA_HAZARDS,
-      cachedShelters: VADODARA_SHELTERS,
-      cachedAlerts: MOCK_ALERTS,
-    });
+      set({
+        isOnline: true,
+        isSyncing: false,
+        lastSyncTimestamp: updatedTime,
+        cachedHazards: VADODARA_HAZARDS,
+        cachedShelters: VADODARA_SHELTERS,
+        cachedAlerts: MOCK_ALERTS,
+      });
+    } catch (err) {
+      console.warn('Silent background sync fallback to local cache:', err);
+      set({ isOnline: false, isSyncing: false });
+      await get().loadCachedData();
+    }
   },
 
   checkSyncStatus: async () => {
     await get().loadCachedData();
+    await get().silentBackgroundSync();
   },
 
   loadCachedData: async () => {

@@ -36,7 +36,7 @@ export const SOSButton: React.FC<Props> = ({ onPress, size = 'normal' }) => {
         ]}
       >
         <AlertOctagon size={isLarge ? 36 : 22} color="#FFF" />
-        <Text style={[styles.sosText, isLarge && styles.sosTextLarge]}>SOS</Text>
+        <Text style={[styles.sosText, isLarge && styles.sosTextLarge]}>EMERGENCY</Text>
       </View>
     </TouchableOpacity>
   );

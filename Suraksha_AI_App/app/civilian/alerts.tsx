@@ -35,7 +35,12 @@ export default function CivilianAlertsScreen() {
 
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* Section Tabs Pill Selector */}
-        <View style={styles.tabsRow}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.tabsScrollContent}
+          style={styles.tabsScrollView}
+        >
           {[
             { id: 'ALL', label: t('filterAll'), count: alerts.length },
             { id: 'CRITICAL', label: t('filterCritical'), count: criticalAlerts.length },
@@ -56,7 +61,7 @@ export default function CivilianAlertsScreen() {
               </TouchableOpacity>
             );
           })}
-        </View>
+        </ScrollView>
 
         {/* Section Stream */}
         <View style={styles.streamList}>
@@ -82,10 +87,13 @@ const styles = StyleSheet.create({
     paddingTop: spacing.sm,
     paddingBottom: 110,
   },
-  tabsRow: {
+  tabsScrollView: {
+    marginBottom: spacing.md,
+  },
+  tabsScrollContent: {
     flexDirection: 'row',
     gap: spacing.xs,
-    marginBottom: spacing.md,
+    paddingRight: spacing.md,
   },
   tabChip: {
     backgroundColor: '#FFFFFF',

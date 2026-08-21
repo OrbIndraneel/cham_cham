@@ -1,14 +1,51 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import React, { useRef } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  Animated,
+} from 'react-native';
 import { useRouter } from 'expo-router';
-import { Shield, UserCheck, Radio, AlertOctagon, Sparkles, MapPin } from 'lucide-react-native';
+import {
+  UserCheck,
+  Radio,
+  MapPin,
+  ArrowRight,
+  Map,
+  Navigation,
+  WifiOff,
+  AlertCircle,
+} from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { colors, typography, spacing, radius, shadows } from '../src/theme';
+import { StatusBar } from 'expo-status-bar';
 import { useUserStore } from '../src/store/useUserStore';
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { setRole } = useUserStore();
+  const { profile, setRole } = useUserStore();
+
+  const civilianScale = useRef(new Animated.Value(1));
+  const authorityScale = useRef(new Animated.Value(1));
+
+  const handlePressIn = (anim: Animated.Value) => {
+    Animated.spring(anim, {
+      toValue: 0.985,
+      useNativeDriver: true,
+      speed: 30,
+      bounciness: 0,
+    }).start();
+  };
+
+  const handlePressOut = (anim: Animated.Value) => {
+    Animated.spring(anim, {
+      toValue: 1,
+      useNativeDriver: true,
+      speed: 30,
+      bounciness: 2,
+    }).start();
+  };
 
   const handleSelectRole = (role: 'CIVILIAN' | 'AUTHORITY') => {
     setRole(role);
@@ -19,212 +56,272 @@ export default function HomeScreen() {
     }
   };
 
+  const selectedCity = profile?.selectedCity || 'Vadodara';
+
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Top App Header */}
-      <View style={styles.header}>
-        <View style={styles.logoBox}>
-          <Shield size={32} color={colors.primary.main} />
+    <SafeAreaView style={styles.safeArea}>
+      <StatusBar style="dark" />
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        bounces={false}
+      >
+        {/* BRANDING SECTION */}
+        <View style={styles.brandingContainer}>
+          <Text style={styles.brandTitle}>SURAKSHA AI</Text>
+          <Text style={styles.brandSubtitle}>
+            AI-Powered Disaster Management{'\n'}& Safe Evacuation Platform
+          </Text>
         </View>
-        <Text style={styles.title}>SURAKSHA AI</Text>
-        <Text style={styles.subtitle}>
-          AI-Powered Disaster Management & Safe Evacuation Platform
-        </Text>
-        <View style={styles.badgeRow}>
-          <View style={styles.sihBadge}>
-            <Sparkles size={12} color={colors.safety.main} />
-            <Text style={styles.sihText}>SIH 2026 Emergency AI Engine</Text>
-          </View>
+
+        {/* MAIN PORTAL SELECTION */}
+        <View style={styles.portalContainer}>
+          <Text style={styles.sectionLabel}>SELECT ACCESS PORTAL</Text>
+
+          {/* PRIMARY ACTION CARD: CIVILIAN / EVACUEE */}
+          <Animated.View style={{ transform: [{ scale: civilianScale.current }] }}>
+            <TouchableOpacity
+              style={styles.civilianCard}
+              onPress={() => handleSelectRole('CIVILIAN')}
+              onPressIn={() => handlePressIn(civilianScale.current)}
+              onPressOut={() => handlePressOut(civilianScale.current)}
+              activeOpacity={0.9}
+            >
+              <View style={styles.civilianTopRow}>
+                <View style={styles.civilianIconBox}>
+                  <UserCheck size={22} color="#EA580C" strokeWidth={2} />
+                </View>
+
+                <View style={styles.civilianTextCol}>
+                  <Text style={styles.civilianCardTitle}>CIVILIAN / EVACUEE</Text>
+                  <Text style={styles.civilianCardDesc}>
+                    Safe evacuation routes, live hazard information, shelter availability and emergency SOS.
+                  </Text>
+                </View>
+
+                <View style={styles.civilianArrowCircle}>
+                  <ArrowRight size={16} color="#EA580C" strokeWidth={2.2} />
+                </View>
+              </View>
+
+              <View style={styles.cardDivider} />
+
+              <View style={styles.featureRow}>
+                <View style={styles.featureTag}>
+                  <Map size={12} color="#52525B" strokeWidth={2} />
+                  <Text style={styles.featureTagText}>Live Map</Text>
+                </View>
+                <View style={styles.featureTag}>
+                  <Navigation size={12} color="#52525B" strokeWidth={2} />
+                  <Text style={styles.featureTagText}>Safest Route</Text>
+                </View>
+                <View style={styles.featureTag}>
+                  <WifiOff size={12} color="#52525B" strokeWidth={2} />
+                  <Text style={styles.featureTagText}>Offline Mode</Text>
+                </View>
+                <View style={[styles.featureTag, styles.featureTagSos]}>
+                  <AlertCircle size={12} color="#DC2626" strokeWidth={2} />
+                  <Text style={styles.featureTagTextSos}>EMERGENCY</Text>
+                </View>
+              </View>
+            </TouchableOpacity>
+          </Animated.View>
+
+          {/* SECONDARY ACTION: AUTHORITY ACCESS */}
+          <Animated.View style={{ transform: [{ scale: authorityScale.current }] }}>
+            <TouchableOpacity
+              style={styles.authorityButton}
+              onPress={() => handleSelectRole('AUTHORITY')}
+              onPressIn={() => handlePressIn(authorityScale.current)}
+              onPressOut={() => handlePressOut(authorityScale.current)}
+              activeOpacity={0.8}
+            >
+              <Radio size={14} color="#71717A" strokeWidth={2} />
+              <Text style={styles.authorityButtonText}>Authority / Control Room Access</Text>
+              <ArrowRight size={13} color="#A1A1AA" strokeWidth={2} />
+            </TouchableOpacity>
+          </Animated.View>
         </View>
-      </View>
 
-      {/* Role Selection Options */}
-      <View style={styles.roleSelectionContainer}>
-        <Text style={styles.sectionTitle}>SELECT ACCESS PORTAL</Text>
-
-        {/* Civilian Role Card */}
-        <TouchableOpacity
-          style={styles.roleCard}
-          onPress={() => handleSelectRole('CIVILIAN')}
-          activeOpacity={0.8}
-        >
-          <View style={[styles.roleIconBox, { backgroundColor: 'rgba(59, 130, 246, 0.15)' }]}>
-            <UserCheck size={28} color={colors.primary.main} />
-          </View>
-          <View style={styles.roleTextContainer}>
-            <Text style={styles.roleTitle}>CIVILIAN / EVACUEE PORTAL</Text>
-            <Text style={styles.roleDesc}>
-              Dynamic safe evacuation routes, live hazard map, shelter capacity tracking & 1-tap SOS emergency dispatch.
-            </Text>
-            <View style={styles.tagRow}>
-              <Text style={styles.tagText}>• Live GIS Map</Text>
-              <Text style={styles.tagText}>• Dynamic Safest Path</Text>
-              <Text style={styles.tagText}>• Offline Mode</Text>
-            </View>
-          </View>
-        </TouchableOpacity>
-
-        {/* Authority Role Card */}
-        <TouchableOpacity
-          style={[styles.roleCard, styles.authorityCard]}
-          onPress={() => handleSelectRole('AUTHORITY')}
-          activeOpacity={0.8}
-        >
-          <View style={[styles.roleIconBox, { backgroundColor: 'rgba(249, 115, 22, 0.15)' }]}>
-            <Radio size={28} color={colors.safety.main} />
-          </View>
-          <View style={styles.roleTextContainer}>
-            <Text style={[styles.roleTitle, { color: colors.safety.main }]}>
-              AUTHORITY / CONTROL ROOM
-            </Text>
-            <Text style={styles.roleDesc}>
-              Disaster dashboard, AI rainfall & surge scenario simulator, secondary cascade predictor & emergency alert dispatch.
-            </Text>
-            <View style={styles.tagRow}>
-              <Text style={[styles.tagText, { color: colors.safety.light }]}>• AI Cascade Simulator</Text>
-              <Text style={[styles.tagText, { color: colors.safety.light }]}>• Alert Dispatch</Text>
-            </View>
-          </View>
-        </TouchableOpacity>
-      </View>
-
-      {/* Demo Active Disaster Region Notice */}
-      <View style={styles.demoFooter}>
-        <MapPin size={14} color={colors.text.secondary} />
-        <Text style={styles.demoText}>
-          Active Demo Region: <Text style={{ color: colors.text.primary, fontWeight: 'bold' }}>Vadodara, Gujarat (Vishwamitri Flood)</Text>
-        </Text>
-      </View>
+        {/* DEMO REGION FOOTER */}
+        <View style={styles.demoRegionFooter}>
+          <MapPin size={13} color="#EA580C" strokeWidth={2} />
+          <Text style={styles.demoRegionText}>
+            Active Demo Region:{' '}
+            <Text style={styles.demoRegionBold}>{selectedCity}, Gujarat</Text>
+          </Text>
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
-    backgroundColor: colors.background.primary,
-    paddingHorizontal: spacing.lg,
+    backgroundColor: '#FAFAFA',
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingHorizontal: 24,
+    paddingTop: 48,
+    paddingBottom: 28,
     justifyContent: 'space-between',
-    paddingVertical: spacing.md,
   },
-  header: {
+
+  /* BRANDING SECTION */
+  brandingContainer: {
     alignItems: 'center',
-    marginTop: spacing.lg,
+    marginBottom: 40,
   },
-  logoBox: {
-    width: 64,
-    height: 64,
-    borderRadius: radius.xl,
-    backgroundColor: 'rgba(59, 130, 246, 0.15)',
-    borderWidth: 2,
-    borderColor: colors.border.strong,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: spacing.md,
-    ...shadows.glowBlue,
+  brandTitle: {
+    color: '#18181B',
+    fontSize: 30,
+    fontWeight: '800',
+    letterSpacing: 1.8,
+    textAlign: 'center',
   },
-  title: {
-    color: colors.text.primary,
-    fontSize: typography.fontSize.display,
-    fontWeight: typography.fontWeight.heavy,
+  brandSubtitle: {
+    color: '#71717A',
+    fontSize: 14,
+    fontWeight: '400',
+    textAlign: 'center',
+    marginTop: 10,
+    lineHeight: 21,
+  },
+
+  /* PORTAL AREA */
+  portalContainer: {
+    marginVertical: 12,
+  },
+  sectionLabel: {
+    color: '#A1A1AA',
+    fontSize: 11,
+    fontWeight: '700',
     letterSpacing: 1.5,
-  },
-  subtitle: {
-    color: colors.text.secondary,
-    fontSize: typography.fontSize.sm,
     textAlign: 'center',
-    marginTop: spacing.xs,
-    paddingHorizontal: spacing.md,
+    marginBottom: 18,
   },
-  badgeRow: {
-    marginTop: spacing.md,
-  },
-  sihBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(249, 115, 22, 0.15)',
-    paddingHorizontal: spacing.md,
-    paddingVertical: 4,
-    borderRadius: radius.full,
+
+  /* PRIMARY CIVILIAN CARD */
+  civilianCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
+    padding: 20,
     borderWidth: 1,
-    borderColor: 'rgba(249, 115, 22, 0.4)',
-    gap: 6,
+    borderColor: '#E4E4E7',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
+    elevation: 2,
+    marginBottom: 16,
   },
-  sihText: {
-    color: colors.safety.main,
-    fontSize: typography.fontSize.xs,
-    fontWeight: typography.fontWeight.bold,
-  },
-  roleSelectionContainer: {
-    gap: spacing.md,
-  },
-  sectionTitle: {
-    color: colors.text.secondary,
-    fontSize: typography.fontSize.xs,
-    fontWeight: typography.fontWeight.heavy,
-    letterSpacing: 1,
-    textAlign: 'center',
-    marginBottom: spacing.xs,
-  },
-  roleCard: {
+  civilianTopRow: {
     flexDirection: 'row',
-    backgroundColor: colors.background.secondary,
-    borderRadius: radius.xl,
-    padding: spacing.md,
-    borderWidth: 1,
-    borderColor: colors.border.strong,
-    gap: spacing.md,
-    ...shadows.md,
+    alignItems: 'flex-start',
+    gap: 14,
   },
-  authorityCard: {
-    borderColor: 'rgba(249, 115, 22, 0.4)',
-  },
-  roleIconBox: {
-    width: 48,
-    height: 48,
-    borderRadius: radius.lg,
+  civilianIconBox: {
+    width: 42,
+    height: 42,
+    borderRadius: 12,
+    backgroundColor: 'rgba(234, 88, 12, 0.08)',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  roleTextContainer: {
+  civilianTextCol: {
     flex: 1,
   },
-  roleTitle: {
-    color: colors.primary.light,
-    fontSize: typography.fontSize.md,
-    fontWeight: typography.fontWeight.heavy,
-    letterSpacing: 0.5,
+  civilianCardTitle: {
+    color: '#18181B',
+    fontSize: 16,
+    fontWeight: '800',
+    letterSpacing: 0.3,
     marginBottom: 4,
   },
-  roleDesc: {
-    color: colors.text.secondary,
-    fontSize: typography.fontSize.xs,
-    lineHeight: 18,
-    marginBottom: spacing.xs,
+  civilianCardDesc: {
+    color: '#71717A',
+    fontSize: 13,
+    lineHeight: 19,
   },
-  tagRow: {
+  civilianArrowCircle: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(234, 88, 12, 0.08)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 2,
+  },
+  cardDivider: {
+    height: 1,
+    backgroundColor: '#F4F4F5',
+    marginVertical: 16,
+  },
+  featureRow: {
     flexDirection: 'row',
-    gap: spacing.sm,
+    alignItems: 'center',
+    gap: 8,
     flexWrap: 'wrap',
   },
-  tagText: {
-    color: colors.primary.main,
-    fontSize: 10,
-    fontWeight: typography.fontWeight.bold,
+  featureTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F4F4F5',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 8,
+    gap: 5,
   },
-  demoFooter: {
+  featureTagText: {
+    color: '#3F3F46',
+    fontSize: 11.5,
+    fontWeight: '600',
+  },
+  featureTagSos: {
+    backgroundColor: 'rgba(220, 38, 38, 0.06)',
+  },
+  featureTagTextSos: {
+    color: '#DC2626',
+    fontSize: 11.5,
+    fontWeight: '700',
+  },
+
+  /* SECONDARY AUTHORITY BUTTON */
+  authorityButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.background.secondary,
-    paddingVertical: spacing.sm,
-    borderRadius: radius.md,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    paddingVertical: 14,
+    paddingHorizontal: 18,
     borderWidth: 1,
-    borderColor: colors.border.subtle,
-    gap: 6,
+    borderColor: '#E4E4E7',
+    gap: 8,
   },
-  demoText: {
-    color: colors.text.secondary,
-    fontSize: typography.fontSize.xs,
+  authorityButtonText: {
+    color: '#52525B',
+    fontSize: 13,
+    fontWeight: '600',
+  },
+
+  /* DEMO REGION FOOTER */
+  demoRegionFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    alignSelf: 'center',
+    marginTop: 24,
+  },
+  demoRegionText: {
+    color: '#71717A',
+    fontSize: 12.5,
+  },
+  demoRegionBold: {
+    color: '#18181B',
+    fontWeight: '700',
   },
 });

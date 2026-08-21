@@ -44,8 +44,7 @@ export const SafeguardBottomSheet: React.FC<Props> = ({
         accessibilityLabel={t('emergencySosButton')}
       >
         <View style={styles.sosContentRow}>
-          <Text style={styles.sosBadgeText}>SOS</Text>
-          <Text style={styles.sosFullText}>{t('emergencySosButton')}</Text>
+          <Text style={styles.sosFullText}>EMERGENCY</Text>
         </View>
       </TouchableOpacity>
 

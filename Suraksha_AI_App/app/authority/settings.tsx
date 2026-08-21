@@ -1,12 +1,19 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, Switch, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
 import { Header } from '../../src/components/common/Header';
 import { ConnectionStatus } from '../../src/components/common/ConnectionStatus';
-import { Shield, Radio, PhoneCall, Layers, FileText, CheckCircle2, UserCheck } from 'lucide-react-native';
+import { Shield, Radio, PhoneCall, Layers, FileText, UserCheck, LogOut } from 'lucide-react-native';
 import { colors, typography, spacing, radius, shadows } from '../../src/theme';
 
 export default function AuthoritySettingsScreen() {
+  const router = useRouter();
+
+  const handleLogout = () => {
+    router.replace('/');
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <Header title="OFFICER COMMAND PROFILE" />
@@ -77,6 +84,18 @@ export default function AuthoritySettingsScreen() {
           <Text style={styles.auditText}>
             Shift Log #4029 Active • All broadcast dispatches logged to GSDMA State Audit Ledger.
           </Text>
+        </View>
+
+        {/* LOG OUT / SWITCH PORTAL CARD */}
+        <View style={[styles.card, styles.logoutCard]}>
+          <TouchableOpacity
+            style={styles.logoutButton}
+            onPress={handleLogout}
+            activeOpacity={0.8}
+          >
+            <LogOut size={18} color="#DC2626" />
+            <Text style={styles.logoutText}>Log Out / Switch Access Portal</Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -194,11 +213,28 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     borderRadius: radius.md,
     gap: spacing.xs,
-    marginBottom: spacing.xxl,
+    marginBottom: spacing.md,
   },
   auditText: {
     color: colors.text.secondary,
     fontSize: 11,
     flex: 1,
+  },
+  logoutCard: {
+    borderColor: 'rgba(220, 38, 38, 0.25)',
+    backgroundColor: 'rgba(220, 38, 38, 0.04)',
+    marginBottom: spacing.xxl,
+  },
+  logoutButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.xs,
+    paddingVertical: spacing.xs,
+  },
+  logoutText: {
+    color: '#DC2626',
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.bold,
   },
 });

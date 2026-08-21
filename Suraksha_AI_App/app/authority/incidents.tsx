@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Header } from '../../src/components/common/Header';
 import { ConnectionStatus } from '../../src/components/common/ConnectionStatus';
@@ -40,7 +40,12 @@ export default function AuthorityIncidentsScreen() {
 
       <View style={styles.content}>
         {/* Status Filter Row */}
-        <View style={styles.filterRow}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.filterScrollContent}
+          style={styles.filterScrollView}
+        >
           {['ALL', 'Evacuation', 'Critical', 'Warning', 'Monitoring'].map((status) => (
             <TouchableOpacity
               key={status}
@@ -60,7 +65,7 @@ export default function AuthorityIncidentsScreen() {
               </Text>
             </TouchableOpacity>
           ))}
-        </View>
+        </ScrollView>
 
         {/* Incident List */}
         <FlatList
@@ -126,10 +131,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingTop: spacing.md,
   },
-  filterRow: {
+  filterScrollView: {
+    marginBottom: spacing.md,
+    maxHeight: 36,
+  },
+  filterScrollContent: {
     flexDirection: 'row',
     gap: spacing.xs,
-    marginBottom: spacing.md,
+    paddingRight: spacing.md,
   },
   filterChip: {
     backgroundColor: colors.background.secondary,

@@ -22,8 +22,6 @@ export interface SosDispatchRecord {
 
 const delay = (ms = 300) => new Promise((resolve) => setTimeout(resolve, ms));
 
-import { ApiClient } from '../api/client';
-
 export class MockSosService {
   private static activeSosRecord: SosDispatchRecord | null = null;
 
@@ -52,17 +50,6 @@ export class MockSosService {
       assignedUnit: 'NDRF Battalion 06 (Rescue Boat 4)',
       status: 'DISPATCHED',
     };
-
-    // Synchronize with backend API
-    ApiClient.dispatchSOS({
-      user_id: `user-${Date.now()}`,
-      user_name: userName,
-      user_phone: userPhone,
-      latitude: coordinate.latitude,
-      longitude: coordinate.longitude,
-      emergency_type: reason,
-      notes: medicalConditions ? `Medical: ${medicalConditions}` : undefined,
-    }).catch((err) => console.warn('[MockSosService] Live dispatch failed:', err));
 
     this.activeSosRecord = record;
     return record;

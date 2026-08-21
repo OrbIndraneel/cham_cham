@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TextInput, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TextInput, TouchableOpacity, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Header } from '../../src/components/common/Header';
 import { ConnectionStatus } from '../../src/components/common/ConnectionStatus';
@@ -10,11 +10,17 @@ import { useRouter } from 'expo-router';
 import { Search, Filter, Home } from 'lucide-react-native';
 import { Shelter } from '../../src/types';
 
+import { LocationService } from '../../src/services/location/locationService';
+
 export default function SheltersScreen() {
   const router = useRouter();
-  const { shelters, calculateSafeRoute } = useDisasterStore();
+  const { shelters, calculateSafeRoute, loadDisasterData } = useDisasterStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState<'ALL' | 'OPEN' | 'MEDICAL' | 'FOOD'>('ALL');
+
+  React.useEffect(() => {
+    loadDisasterData();
+  }, []);
 
   const filteredShelters = shelters.filter((shelter) => {
     const matchesSearch =
@@ -28,7 +34,8 @@ export default function SheltersScreen() {
   });
 
   const handleRouteToShelter = async (shelter: Shelter) => {
-    await calculateSafeRoute({ latitude: 22.3072, longitude: 73.1812 }, shelter.id);
+    const userLocation = await LocationService.getCurrentLocation();
+    await calculateSafeRoute(userLocation, shelter.id);
     router.push('/civilian/evacuation' as any);
   };
 
@@ -51,7 +58,12 @@ export default function SheltersScreen() {
         </View>
 
         {/* Filter Chips Row */}
-        <View style={styles.filterRow}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.filterScrollContent}
+          style={styles.filterScrollView}
+        >
           {[
             { key: 'ALL', label: 'All Camps' },
             { key: 'OPEN', label: 'Available Only' },
@@ -76,7 +88,7 @@ export default function SheltersScreen() {
               </Text>
             </TouchableOpacity>
           ))}
-        </View>
+        </ScrollView>
 
         <FlatList
           data={filteredShelters}
@@ -119,10 +131,13 @@ const styles = StyleSheet.create({
     color: colors.text.primary,
     fontSize: typography.fontSize.sm,
   },
-  filterRow: {
+  filterScrollView: {
+    marginBottom: spacing.md,
+  },
+  filterScrollContent: {
     flexDirection: 'row',
     gap: spacing.xs,
-    marginBottom: spacing.md,
+    paddingRight: spacing.md,
   },
   filterChip: {
     backgroundColor: colors.background.secondary,

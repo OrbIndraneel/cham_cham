@@ -11,12 +11,21 @@ import { colors, typography, spacing, radius, shadows } from '../../src/theme';
 import { Navigation, ShieldAlert, Clock, MapPin, AlertTriangle, CheckCircle2, CornerUpRight, StopCircle } from 'lucide-react-native';
 
 export default function CivilianEvacuationScreen() {
-  const { evacuationRoute, hazards, shelters } = useDisasterStore();
+  const { evacuationRoute, hazards, shelters, loadDisasterData } = useDisasterStore();
   const { profile } = useUserStore();
 
   const [isEvacuating, setIsEvacuating] = useState(false);
-  const [etaRemainingMins, setEtaRemainingMins] = useState(14);
-  const [distanceRemainingKm, setDistanceRemainingKm] = useState(4.2);
+  const [etaRemainingMins, setEtaRemainingMins] = useState(evacuationRoute?.estimatedTimeMins || 14);
+  const [distanceRemainingKm, setDistanceRemainingKm] = useState(evacuationRoute?.distanceKm || 4.2);
+
+  useEffect(() => {
+    if (!evacuationRoute) {
+      loadDisasterData();
+    } else {
+      setEtaRemainingMins(evacuationRoute.estimatedTimeMins);
+      setDistanceRemainingKm(evacuationRoute.distanceKm);
+    }
+  }, [evacuationRoute]);
 
   useEffect(() => {
     let timer: any;

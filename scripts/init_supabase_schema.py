@@ -36,6 +36,13 @@ def setup_supabase_schema():
                 admin_incharge_phone VARCHAR(50),
                 location GEOMETRY(Point, 4326)
             );
+            ALTER TABLE shelters ADD COLUMN IF NOT EXISTS medical_facilities_available BOOLEAN DEFAULT TRUE;
+            ALTER TABLE shelters ADD COLUMN IF NOT EXISTS food_supplies_days INT DEFAULT 7;
+            ALTER TABLE shelters ADD COLUMN IF NOT EXISTS power_generator BOOLEAN DEFAULT TRUE;
+            ALTER TABLE shelters ADD COLUMN IF NOT EXISTS helipad_access BOOLEAN DEFAULT FALSE;
+            ALTER TABLE shelters ADD COLUMN IF NOT EXISTS water_supply_liters INT DEFAULT 5000;
+            ALTER TABLE shelters ADD COLUMN IF NOT EXISTS admin_incharge_name VARCHAR(100);
+            ALTER TABLE shelters ADD COLUMN IF NOT EXISTS admin_incharge_phone VARCHAR(50);
         """))
 
         # 2. Create Hazard Zones Table

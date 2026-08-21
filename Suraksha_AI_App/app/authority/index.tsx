@@ -26,7 +26,7 @@ export default function AuthorityDashboardScreen() {
       <Header title="CONTROL ROOM COMMAND" />
       <ConnectionStatus />
 
-      <ScrollView style={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView style={styles.scrollContent} contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
         {/* State Disaster Emergency Overview Banner */}
         <View style={styles.overviewBanner}>
           <ShieldAlert size={24} color={colors.severity.CRITICAL.main} />
@@ -136,6 +136,9 @@ const styles = StyleSheet.create({
   scrollContent: {
     flex: 1,
     padding: spacing.md,
+  },
+  scrollContainer: {
+    paddingBottom: 110,
   },
   overviewBanner: {
     flexDirection: 'row',
